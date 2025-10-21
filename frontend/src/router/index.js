@@ -5,11 +5,14 @@ import SignUp from '../pages/SignUp.vue';
 import ActivateAccount from '../pages/ActivateAccount.vue';
 import ForgotPassword from '../pages/ForgotPassword.vue';
 import ResetPassword from '../pages/ResetPassword.vue';
+import Terms from '../pages/Terms.vue';
 
 const routes = [
+  { path: '/walle/', name: '/', component: Home },
   { path: '/walle/home', name: 'Home', component: Home },
   { path: '/walle/signin', name: 'Sign In', component: SignIn },
   { path: '/walle/signup', name: 'Sign Up', component: SignUp },
+  { path: '/walle/terms', name: 'Terms', component: Terms },
   { path: '/walle/activate', name: 'Activate Account', component: ActivateAccount },
   { path: '/walle/forgot-password', name: 'Forgot Password', component: ForgotPassword },
   { path: '/walle/reset-password', name: 'Reset Password', component: ResetPassword },

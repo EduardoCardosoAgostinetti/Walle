@@ -10,7 +10,6 @@ const apiResponse = require("../config/api_response");
 
 const USERS_TABLE = process.env.USERS_TABLE || "Users";
 
-/* ---------------------- Helpers ---------------------- */
 function isValidEmail(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
@@ -90,7 +89,6 @@ async function sendResetPasswordEmail(toEmail, resetToken) {
   await transporter.sendMail(mailOptions);
 }
 
-/* ---------------------- Create user ---------------------- */
 exports.createUser = async (req, res) => {
   try {
     let { full_name, username, email, password, confirmPassword } = req.body;
@@ -160,7 +158,6 @@ exports.createUser = async (req, res) => {
   }
 };
 
-/* ---------------------- Activate account ---------------------- */
 exports.activateUser = async (req, res) => {
   try {
     const { token } = req.query;
@@ -202,7 +199,6 @@ exports.activateUser = async (req, res) => {
   }
 };
 
-/* ---------------------- Login ---------------------- */
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -256,7 +252,6 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-/* ---------------------- Forgot password ---------------------- */
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -283,13 +278,12 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-/* ---------------------- Reset password ---------------------- */
 exports.resetPassword = async (req, res) => {
   try {
-    const { token, password, confirmPassword } = req.body;
+    const { token, newPassword, confirmPassword } = req.body;
     if (!token) return apiResponse(res, false, "MISSING_TOKEN", "Token not provided.", null, 400);
-    if (!password || !confirmPassword) return apiResponse(res, false, "MISSING_PASSWORDS", "Password and confirmation are required.", null, 400);
-    if (password !== confirmPassword) return apiResponse(res, false, "PASSWORD_MISMATCH", "Passwords do not match.", null, 400);
+    if (!newPassword || !confirmPassword) return apiResponse(res, false, "MISSING_PASSWORDS", "Password and confirmation are required.", null, 400);
+    if (newPassword !== confirmPassword) return apiResponse(res, false, "PASSWORD_MISMATCH", "Passwords do not match.", null, 400);
 
     let decoded;
     try {
@@ -308,7 +302,7 @@ exports.resetPassword = async (req, res) => {
 
     if (!userResult.Items || userResult.Items.length === 0) return apiResponse(res, false, "USER_NOT_FOUND", "User not found.", null, 404);
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
     const user = userResult.Items[0];
 
     await dynamoDB.send(
@@ -327,7 +321,6 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
-/* ---------------------- Update full name ---------------------- */
 exports.updateFullName = async (req, res) => {
   try {
     const { id } = req.user;
@@ -352,7 +345,6 @@ exports.updateFullName = async (req, res) => {
   }
 };
 
-/* ---------------------- Update email ---------------------- */
 exports.updateEmail = async (req, res) => {
   try {
     const { id } = req.user;
@@ -386,7 +378,6 @@ exports.updateEmail = async (req, res) => {
   }
 };
 
-/* ---------------------- Update username ---------------------- */
 exports.updateUsername = async (req, res) => {
   try {
     const { id } = req.user;
@@ -420,7 +411,6 @@ exports.updateUsername = async (req, res) => {
   }
 };
 
-/* ---------------------- Update password (authenticated) ---------------------- */
 exports.updatePassword = async (req, res) => {
   try {
     const { id } = req.user;

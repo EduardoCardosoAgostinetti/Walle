@@ -8,7 +8,7 @@ console.log("Rota POST /users/register ativa");
 router.post("/login", userController.loginUser);
 router.post("/forgot-password", userController.forgotPassword);
 router.post("/reset-password", userController.resetPassword);
-router.get("/activate", userController.activateUser);
+router.get("/activate-account", userController.activateUser);
 
 router.put("/update/fullname", userController.updateFullName);
 router.put("/update/email", userController.updateEmail);

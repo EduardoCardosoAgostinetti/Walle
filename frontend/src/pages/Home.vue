@@ -41,13 +41,13 @@
       </section>
     </div>
 
-    <Footer />
+    <AppFooter />
   </div>
 </template>
 
 <script setup>
-import AppNavbar from "@/components/AppNavbar.vue";
-import Footer from "@/components/AppFooter.vue";
+import AppNavbar from "@/components/Navbar.vue";
+import AppFooter from "@/components/Footer.vue";
 import HeroImage from "@/assets/finance-hero.png";
 import { RouterLink } from "vue-router";
 </script>

@@ -9,7 +9,7 @@
         @mouseleave="hover = false"
         :style="buttonStyle"
       >
-        Fechar
+        Close
       </button>
     </div>
   </div>

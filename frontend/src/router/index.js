@@ -1,8 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../pages/Home.vue';
+import SignIn from '../pages/SignIn.vue';
+import SignUp from '../pages/SignUp.vue';
+import ActivateAccount from '../pages/ActivateAccount.vue';
 
 const routes = [
   { path: '/walle/home', name: 'Home', component: Home },
+  { path: '/walle/signin', name: 'Sign In', component: SignIn },
+  { path: '/walle/signup', name: 'Sign Up', component: SignUp },
+  { path: '/walle/activate', name: 'Activate Account', component: ActivateAccount },
 ];
 
 const router = createRouter({

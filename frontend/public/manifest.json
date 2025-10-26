@@ -1,7 +1,7 @@
 {
   "name": "Walle App",
   "short_name": "Walle",
-  "theme_color": "#4DBA87",
+  "theme_color": "#000000",
   "background_color": "#000000",
   "display": "standalone",
   "scope": "/",

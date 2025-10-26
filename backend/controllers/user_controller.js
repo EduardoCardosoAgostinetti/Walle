@@ -1,5 +1,5 @@
 // controllers/userController.js
-
+require("dotenv").config({ path: "../.env", quiet: true });
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -278,6 +278,17 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
+function generateJWT(user) {
+  const payload = {
+    id: user.id,
+    email: user.email,
+    username: user.username,
+    full_name: user.full_name,
+  };
+
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
+}
+
 exports.resetPassword = async (req, res) => {
   try {
     const { token, newPassword, confirmPassword } = req.body;
@@ -323,102 +334,131 @@ exports.resetPassword = async (req, res) => {
 
 exports.updateFullName = async (req, res) => {
   try {
-    const { id } = req.user;
+    const { id } = req.user; // pega do token
     const { full_name } = req.body;
-    if (!full_name) return apiResponse(res, false, "MISSING_FULLNAME", "The 'Full Name' field is required.", null, 400);
+
+    if (!full_name) {
+      return apiResponse(res, false, "MISSING_FULLNAME", "The 'Full Name' field is required.", null, 400);
+    }
 
     const capitalizedName = capitalizeFullName(full_name);
 
-    await dynamoDB.send(
+    // Atualiza e retorna os dados novos
+    const updated = await dynamoDB.send(
       new UpdateCommand({
         TableName: USERS_TABLE,
         Key: { id },
         UpdateExpression: "set full_name = :n",
         ExpressionAttributeValues: { ":n": capitalizedName },
+        ReturnValues: "ALL_NEW" // retorna os atributos atualizados
       })
     );
 
-    return apiResponse(res, true, "NAME_UPDATED", "Full name updated successfully.", null, 200);
+    const updatedUser = updated.Attributes; // usuário atualizado
+    const newToken = generateJWT(updatedUser);  // novo JWT
+
+    return apiResponse(res, true, "NAME_UPDATED", "Full name updated successfully.", {token: newToken}, 200);
+
   } catch (error) {
     console.error("Error updating full name:", error);
     return apiResponse(res, false, "UPDATE_NAME_ERROR", "Error updating full name.", null, 500);
   }
 };
-
 exports.updateEmail = async (req, res) => {
   try {
     const { id } = req.user;
     const { email } = req.body;
-    if (!email) return apiResponse(res, false, "MISSING_EMAIL", "The 'Email' field is required.", null, 400);
-    if (!isValidEmail(email)) return apiResponse(res, false, "INVALID_EMAIL", "The provided email is not valid.", null, 400);
 
+    if (!email) 
+      return apiResponse(res, false, "MISSING_EMAIL", "The 'Email' field is required.", null, 400);
+    if (!isValidEmail(email)) 
+      return apiResponse(res, false, "INVALID_EMAIL", "The provided email is not valid.", null, 400);
+
+    // Verifica se email já existe
     const existing = await dynamoDB.send(
       new ScanCommand({
         TableName: USERS_TABLE,
-        FilterExpression: "email = :email",
-        ExpressionAttributeValues: { ":email": email },
+        FilterExpression: "email = :email AND id <> :id",
+        ExpressionAttributeValues: { ":email": email, ":id": id },
       })
     );
 
-    if (existing.Items && existing.Items.length > 0) return apiResponse(res, false, "EMAIL_EXISTS", "Email already registered.", null, 409);
+    if (existing.Items && existing.Items.length > 0) 
+      return apiResponse(res, false, "EMAIL_EXISTS", "Email already registered.", null, 409);
 
-    await dynamoDB.send(
+    // Atualiza e retorna usuário atualizado
+    const updated = await dynamoDB.send(
       new UpdateCommand({
         TableName: USERS_TABLE,
         Key: { id },
         UpdateExpression: "set email = :e",
         ExpressionAttributeValues: { ":e": email },
+        ReturnValues: "ALL_NEW",
       })
     );
 
-    return apiResponse(res, true, "EMAIL_UPDATED", "Email updated successfully.", null, 200);
+    const updatedUser = updated.Attributes;
+    const newToken = generateJWT(updatedUser); 
+
+    return apiResponse(res, true, "EMAIL_UPDATED", "Email updated successfully.", {token: newToken}, 200);
+
   } catch (error) {
     console.error("Error updating email:", error);
     return apiResponse(res, false, "UPDATE_EMAIL_ERROR", "Error updating email.", null, 500);
   }
 };
-
 exports.updateUsername = async (req, res) => {
   try {
     const { id } = req.user;
     const { username } = req.body;
-    if (!username) return apiResponse(res, false, "MISSING_USERNAME", "The 'Username' field is required.", null, 400);
 
-    // Check if username already exists
+    if (!username) 
+      return apiResponse(res, false, "MISSING_USERNAME", "The 'Username' field is required.", null, 400);
+
+    // Verifica se username já existe
     const existing = await dynamoDB.send(
       new ScanCommand({
         TableName: USERS_TABLE,
-        FilterExpression: "username = :username",
-        ExpressionAttributeValues: { ":username": username },
+        FilterExpression: "username = :username AND id <> :id",
+        ExpressionAttributeValues: { ":username": username, ":id": id },
       })
     );
 
-    if (existing.Items && existing.Items.length > 0) return apiResponse(res, false, "USERNAME_EXISTS", "Username already in use.", null, 409);
+    if (existing.Items && existing.Items.length > 0) 
+      return apiResponse(res, false, "USERNAME_EXISTS", "Username already in use.", null, 409);
 
-    await dynamoDB.send(
+    // Atualiza e retorna usuário atualizado
+    const updated = await dynamoDB.send(
       new UpdateCommand({
         TableName: USERS_TABLE,
         Key: { id },
         UpdateExpression: "set username = :u",
         ExpressionAttributeValues: { ":u": username },
+        ReturnValues: "ALL_NEW",
       })
     );
 
-    return apiResponse(res, true, "USERNAME_UPDATED", "Username updated successfully.", null, 200);
+    const updatedUser = updated.Attributes;
+    const newToken = generateJWT(updatedUser); 
+
+    return apiResponse(res, true, "USERNAME_UPDATED", "Username updated successfully.", {token: newToken}, 200);
+
   } catch (error) {
     console.error("Error updating username:", error);
     return apiResponse(res, false, "UPDATE_USERNAME_ERROR", "Error updating username.", null, 500);
   }
 };
-
 exports.updatePassword = async (req, res) => {
   try {
     const { id } = req.user;
     const { currentPassword, newPassword, confirmPassword } = req.body;
 
-    if (!currentPassword || !newPassword || !confirmPassword) return apiResponse(res, false, "MISSING_PASSWORDS", "All password fields are required.", null, 400);
-    if (newPassword !== confirmPassword) return apiResponse(res, false, "PASSWORD_MISMATCH", "New passwords do not match.", null, 400);
+    if (!currentPassword || !newPassword || !confirmPassword) 
+      return apiResponse(res, false, "MISSING_PASSWORDS", "All password fields are required.", null, 400);
+    if (newPassword !== confirmPassword) 
+      return apiResponse(res, false, "PASSWORD_MISMATCH", "New passwords do not match.", null, 400);
 
+    // Pega usuário atual
     const userResult = await dynamoDB.send(
       new ScanCommand({
         TableName: USERS_TABLE,
@@ -427,26 +467,36 @@ exports.updatePassword = async (req, res) => {
       })
     );
 
-    if (!userResult.Items || userResult.Items.length === 0) return apiResponse(res, false, "USER_NOT_FOUND", "User not found.", null, 404);
+    if (!userResult.Items || userResult.Items.length === 0) 
+      return apiResponse(res, false, "USER_NOT_FOUND", "User not found.", null, 404);
 
     const user = userResult.Items[0];
     const validPassword = await bcrypt.compare(currentPassword, user.password);
-    if (!validPassword) return apiResponse(res, false, "INVALID_PASSWORD", "Current password incorrect.", null, 401);
+    if (!validPassword) 
+      return apiResponse(res, false, "INVALID_PASSWORD", "Current password incorrect.", null, 401);
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    await dynamoDB.send(
+    // Atualiza senha e retorna usuário atualizado
+    const updated = await dynamoDB.send(
       new UpdateCommand({
         TableName: USERS_TABLE,
         Key: { id },
         UpdateExpression: "set password = :p",
         ExpressionAttributeValues: { ":p": hashedPassword },
+        ReturnValues: "ALL_NEW",
       })
     );
 
-    return apiResponse(res, true, "PASSWORD_UPDATED", "Password updated successfully.", null, 200);
+    const updatedUser = updated.Attributes;
+    const newToken = generateJWT(updatedUser); 
+
+    return apiResponse(res, true, "PASSWORD_UPDATED", "Password updated successfully.", {token: newToken}, 200);
+
   } catch (error) {
     console.error("Error updating password:", error);
     return apiResponse(res, false, "UPDATE_PASSWORD_ERROR", "Error updating password.", null, 500);
   }
 };
+
+

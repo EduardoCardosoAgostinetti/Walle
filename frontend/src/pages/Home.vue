@@ -8,7 +8,7 @@
         <div class="hero-text">
           <h1>Manage Your Finances with Walle</h1>
           <p>Track income, expenses, and view financial charts all in one place.</p>
-          <RouterLink to="/signup" class="cta-btn">Get Started</RouterLink>
+          <RouterLink to="/walle/signup" class="cta-btn">Get Started</RouterLink>
         </div>
 
         <div class="hero-image">
@@ -49,6 +49,8 @@
 import AppNavbar from "@/components/Navbar.vue";
 import AppFooter from "@/components/Footer.vue";
 import HeroImage from "@/assets/finance-hero.png";
+import Feature1 from "@/assets/feature-1.png";
+import Feature2 from "@/assets/feature-2.png";
 import { RouterLink } from "vue-router";
 </script>
 

@@ -10,12 +10,16 @@
   },
   "dependencies": {
     "axios": "^1.12.2",
+    "chart.js": "^4.5.1",
+    "jwt-decode": "^4.0.0",
     "lucide-vue-next": "^0.546.0",
     "vue": "^3.5.22",
+    "vue-chartjs": "^5.3.2",
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
-    "vite": "^7.1.7"
+    "vite": "^7.1.7",
+    "workbox-cli": "^2.1.3"
   }
 }

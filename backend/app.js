@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-const userRoutes = require("./routes/user_route"); // verifique se o caminho está correto
+const userRoutes = require("./routes/user_route");
+const transactionRoutes = require("./routes/transaction_route");
 
 const app = express();
 
@@ -9,7 +10,6 @@ app.use(express.json());
 
 // ⚠️ Monta as rotas
 app.use("/user", userRoutes);
-console.log("Rotas /users carregadas");
-
+app.use("/transaction", transactionRoutes);
 
 module.exports = app;

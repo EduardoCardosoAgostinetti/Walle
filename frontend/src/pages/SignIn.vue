@@ -84,7 +84,7 @@ const handleSubmit = async () => {
     });
 
     localStorage.setItem("token", data.data.token);
-    router.push("/walle/dashboard");
+    router.push("/walle/dashboard/transactions");
     console.log(data.data.token);
   } catch (error) {
     if (error.response) {

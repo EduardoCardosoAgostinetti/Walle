@@ -25,15 +25,10 @@
       </template>
 
       <template v-else>
-        <RouterLink to="/walle/dashboard" class="nav-btn">
+        <RouterLink to="/walle/dashboard/transactions" class="nav-btn">
           <LayoutDashboard size="18" />
           <span>Dashboard</span>
         </RouterLink>
-
-        <button class="nav-btn logout" @click="logout">
-          <LogOut size="18" />
-          <span>Log Out</span>
-        </button>
       </template>
     </div>
 
